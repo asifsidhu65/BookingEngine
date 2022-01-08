@@ -47,7 +47,7 @@ class HotelRoom(models.Model):
     room_number = models.CharField(max_length=255,)
 
     def __str__(self):
-        return self.room_number
+        return f'{self.room_number} - {self.hotel_room_type}'
 
 
 class BookingInfo(models.Model):
@@ -74,3 +74,17 @@ class BookingInfo(models.Model):
             obj = self.hotel_room_type
             
         return f'{obj} {self.price}'
+
+
+class Reservation(models.Model):
+    """Reservation model for hotel room or apartment."""
+
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    room = models.ForeignKey(HotelRoom, on_delete=models.CASCADE, null=True, blank=True, related_name='reservations')
+    check_in = models.DateField()
+    check_out = models.DateField()
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.check_in} ~ {self.check_out}'
