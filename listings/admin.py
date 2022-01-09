@@ -1,7 +1,15 @@
 from django.contrib import admin
 
 from .forms import AdminReservationFrom
-from .models import Listing, HotelRoomType, HotelRoom, BookingInfo, Reservation
+from .models import (
+    Listing,
+    HotelRoomType,
+    HotelRoom,
+    BookingInfo,
+    Reservation,
+    Hotel,
+    Apartment,
+)
 
 
 class HotelRoomTypeInline(admin.StackedInline):
@@ -20,6 +28,35 @@ class ListingAdmin(admin.ModelAdmin):
         "city",
     )
     list_filter = ("listing_type",)
+
+
+@admin.register(Hotel)
+class HotelAdmin(admin.ModelAdmin):
+    inlines = [HotelRoomTypeInline]
+    list_display = (
+        "title",
+        "country",
+        "city",
+    )
+    fieldsets = ((None, {"fields": ["title", "country", "city"]}),)
+
+    def save_model(self, request, obj, form, change):
+        obj.listing_type = Listing.HOTEL
+        obj.save()
+
+
+@admin.register(Apartment)
+class ApartmentAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "country",
+        "city",
+    )
+    fieldsets = ((None, {"fields": ["title", "country", "city"]}),)
+
+    def save_model(self, request, obj, form, change):
+        obj.listing_type = Listing.APARTMENT
+        obj.save()
 
 
 class HotelRoomInline(admin.StackedInline):

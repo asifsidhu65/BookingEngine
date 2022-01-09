@@ -5,10 +5,13 @@ from listings.models import Listing
 
 
 class ApartmentSerializer(serializers.ModelSerializer):
+    """Apartment Serializer"""
 
     price = serializers.SerializerMethodField()
 
     class Meta:
+        """Meta class for serializer."""
+
         model = Listing
         fields = (
             'country',
@@ -18,11 +21,14 @@ class ApartmentSerializer(serializers.ModelSerializer):
             'price',
         )
 
-    def get_price(self, instance):
+    @staticmethod
+    def get_price(instance):
+        """Fetch price from booking info."""
         return instance.booking_info.price
 
 
 class HotelRoomSerializer(serializers.Serializer):
+    """Hotel room serializer."""
 
     def to_representation(self, instance):
         pre_data = {
@@ -43,7 +49,17 @@ class HotelRoomSerializer(serializers.Serializer):
 
 
 class AvailableUnitsCriteriaSerialiser(serializers.Serializer):
+    """Serializer for available units (rooms/apartments)."""
 
     max_price = serializers.DecimalField(required=True, min_value=1, max_digits=7, decimal_places=2)
     checkin = serializers.DateField(required=True)
     checkout = serializers.DateField(required=True)
+
+    def validate(self, attrs):
+        """Validate checkout"""
+        attrs = super().validate(attrs)
+        checkout = attrs.get('checkout')
+        checkin = attrs.get('checkin')
+        if checkout and checkin and checkout < checkin:
+            raise serializers.ValidationError('Checkout must be greater then checkin.')
+        return attrs

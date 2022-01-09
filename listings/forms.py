@@ -1,3 +1,4 @@
+"""Forms module for listing app."""
 from django import forms
 from django.utils import timezone
 
@@ -5,7 +6,7 @@ from listings.models import Reservation, HotelRoom
 
 
 class AdminReservationFrom(forms.ModelForm):
-    """Reservation form."""
+    """Admin Reservation form."""
 
     class Meta:
         """Meta attributes for form."""
@@ -52,15 +53,25 @@ class AdminReservationFrom(forms.ModelForm):
 
     def check_reservation(self):
         """Check either reservation exists or not."""
+        hotel = self.cleaned_data['listing']
         if not self.is_valid():
             return None
         data = self.cleaned_data
         checkin, checkout = data["check_in"], data["check_out"]
-        res = Reservation.objects.filter(
-            check_in__lte=checkout, check_out__gte=checkin, room=data["room"]
-        )
-        if res.exists():
-            self.add_error(
-                "room", f"Reservation already exists in {checkin} ~ {checkout}"
+        if hotel.listing_type == hotel.APARTMENT:
+            res = Reservation.objects.filter(
+                check_in__lte=checkout, check_out__gte=checkin, listing=hotel
             )
+            if res.exists():
+                self.add_error(
+                    "listing", f"Reservation already exists in {checkin} ~ {checkout}"
+                )
+        else:
+            res = Reservation.objects.filter(
+                check_in__lte=checkout, check_out__gte=checkin, room=data["room"]
+            )
+            if res.exists():
+                self.add_error(
+                    "room", f"Reservation already exists in {checkin} ~ {checkout}"
+                )
         return None

@@ -88,3 +88,29 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f'{self.check_in} ~ {self.check_out}'
+
+
+class Hotel(Listing):
+
+    class Manager(models.Manager):
+
+        def get_queryset(self):
+            return super().get_queryset().filter(listing_type=Listing.HOTEL)
+
+    objects = Manager()
+
+    class Meta:
+        proxy = True
+
+
+class Apartment(Listing):
+
+    class Manager(models.Manager):
+
+        def get_queryset(self):
+            return super().get_queryset().filter(listing_type=Listing.APARTMENT)
+
+    objects = Manager()
+
+    class Meta:
+        proxy = True
